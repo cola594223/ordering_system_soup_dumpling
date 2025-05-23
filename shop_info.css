@@ -195,6 +195,15 @@ p {
     margin-bottom: 5px;
 }
 
+.phone-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.phone-link:hover {
+    text-decoration: underline;
+}
+
 @media (max-width: 480px) {
     .shop-container {
         width: 100%;
