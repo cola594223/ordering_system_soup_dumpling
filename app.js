@@ -10,10 +10,12 @@ const submitOrderButton = document.getElementById('submit-order');
 const viewCartButton = document.getElementById('view-cart');
 const closeCartButton = document.getElementById('close-cart');
 const categoriesContainer = document.getElementById('categories-container');
+const orderNumberElement = document.getElementById('order-number');
 
 // 購物車數據
 let cart = [];
 let currentCategory = null;
+let currentOrderNumber = 50;  // 從50開始的訂單編號
 
 // 渲染分類標籤
 function renderCategories() {
@@ -195,10 +197,18 @@ function updateTotal() {
     modalTotalAmountElement.textContent = `$${total}`;
 }
 
+// 更新訂單編號
+function updateOrderNumber() {
+    if (orderNumberElement) {
+        orderNumberElement.textContent = currentOrderNumber;
+    }
+}
+
 // 購物車開關
 viewCartButton.addEventListener('click', () => {
     cartModal.classList.remove('hidden');
     document.body.classList.add('modal-open');
+    updateOrderNumber();  // 顯示購物車時更新訂單編號
 });
 
 closeCartButton.addEventListener('click', () => {
@@ -218,10 +228,11 @@ submitOrderButton.addEventListener('click', () => {
     ).join('\n\n');
     const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     
-    alert(`訂單已送出！\n\n訂單明細：\n${orderSummary}\n\n總計：$${total}`);
+    alert(`訂單編號：${currentOrderNumber}\n\n訂單明細：\n${orderSummary}\n\n總計：$${total}`);
     
-    // 清空購物車
+    // 清空購物車並更新訂單編號
     cart = [];
+    currentOrderNumber++;  // 增加訂單編號
     renderCart();
     cartModal.classList.add('hidden');
     document.body.classList.remove('modal-open');
