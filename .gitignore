@@ -31,3 +31,5 @@ pids
 
 # Temporary files
 temp_receipt.txt 
+
+certbot

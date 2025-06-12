@@ -13,9 +13,7 @@ const categoriesContainer = document.getElementById('categories-container');
 const orderNumberElement = document.getElementById('order-number');
 
 // API配置
-const API_BASE_URL = window.location.hostname === 'localhost' 
-    ? 'http://localhost:3000' 
-    : `http://36.232.200.208:3000`;
+const API_BASE_URL = 'http://36.232.200.208:3000';
 
 // 購物車數據
 let cart = [];
