@@ -1,0 +1,15 @@
+{
+  "name": "soup-dumpling-order-system",
+  "version": "1.0.0",
+  "description": "訂單系統API和印表機控制",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "iconv-lite": "^0.6.3",
+    "node-thermal-printer": "^4.4.1"
+  }
+}

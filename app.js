@@ -217,25 +217,44 @@ closeCartButton.addEventListener('click', () => {
 });
 
 // 送出訂單
-submitOrderButton.addEventListener('click', () => {
+submitOrderButton.addEventListener('click', async () => {
     if (cart.length === 0) {
         alert('購物車是空的！');
         return;
     }
 
-    const orderSummary = cart.map(item => 
-        `${item.name} x ${item.quantity}${item.note ? `\n備註：${item.note}` : ''}`
-    ).join('\n\n');
-    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    
-    alert(`訂單編號：${currentOrderNumber}\n\n訂單明細：\n${orderSummary}\n\n總計：$${total}`);
-    
-    // 清空購物車並更新訂單編號
-    cart = [];
-    currentOrderNumber++;  // 增加訂單編號
-    renderCart();
-    cartModal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
+    const orderData = {
+        orderNumber: currentOrderNumber,
+        items: cart,
+        total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+    };
+
+    try {
+        const response = await fetch('http://192.168.1.106:3000/api/orders', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(`訂單已送出！\n訂單編號：${currentOrderNumber}`);
+            
+            // 清空購物車並更新訂單編號
+            cart = [];
+            currentOrderNumber++;
+            renderCart();
+            cartModal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+        } else {
+            throw new Error(result.error || '送出訂單時發生錯誤');
+        }
+    } catch (error) {
+        alert(`錯誤：${error.message}`);
+    }
 });
 
 // 初始化頁面
