@@ -258,7 +258,7 @@ submitOrderButton.addEventListener('click', async () => {
 
     try {
         // 發送訂單到後端 API
-        const response = await fetch('https://da00-2001-b011-b807-7b27-d0e7-5c4d-5ba6-f8ad.ngrok-free.app/api/orders', {
+        const response = await fetch('https://9ff0-2001-b011-b807-7b27-c9ab-a844-6a6a-4bf6.ngrok-free.app/api/orders', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
