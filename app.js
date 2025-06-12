@@ -12,9 +12,6 @@ const closeCartButton = document.getElementById('close-cart');
 const categoriesContainer = document.getElementById('categories-container');
 const orderNumberElement = document.getElementById('order-number');
 
-// API配置
-const API_BASE_URL = 'http://36.232.200.208:3000';
-
 // 購物車數據
 let cart = [];
 let currentCategory = null;
@@ -233,7 +230,7 @@ submitOrderButton.addEventListener('click', async () => {
     };
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/orders`, {
+        const response = await fetch('http://36.232.200.208:3000/api/orders', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
