@@ -11,6 +11,7 @@ const viewCartButton = document.getElementById('view-cart');
 const closeCartButton = document.getElementById('close-cart');
 const categoriesContainer = document.getElementById('categories-container');
 const orderNumberElement = document.getElementById('order-number');
+const customerForm = document.getElementById('customer-form');
 
 // 購物車數據
 let cart = [];
@@ -223,14 +224,41 @@ submitOrderButton.addEventListener('click', async () => {
         return;
     }
 
+    // 獲取訂購人資訊
+    const customerName = document.getElementById('customer-name').value.trim();
+    const customerPhone = document.getElementById('customer-phone').value.trim();
+
+    // 驗證訂購人資訊
+    if (!customerName) {
+        alert('請填寫訂購人姓名！');
+        document.getElementById('customer-name').focus();
+        return;
+    }
+    if (!customerPhone) {
+        alert('請填寫聯絡電話！');
+        document.getElementById('customer-phone').focus();
+        return;
+    }
+
+    // 驗證電話格式（台灣手機格式）
+    const phonePattern = /^09\d{8}$/;
+    if (!phonePattern.test(customerPhone)) {
+        alert('請填寫正確的手機號碼格式（例如：0912345678）！');
+        document.getElementById('customer-phone').focus();
+        return;
+    }
+
     const orderData = {
         orderNumber: currentOrderNumber,
+        customerName,
+        customerPhone,
         items: cart,
         total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
     };
 
     try {
-        const response = await fetch('https://36.232.200.208:3000/api/orders', {
+        // 發送訂單到後端 API
+        const response = await fetch('http://localhost:3000/api/orders', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -240,20 +268,22 @@ submitOrderButton.addEventListener('click', async () => {
 
         const result = await response.json();
 
-        if (result.success) {
-            alert(`訂單已送出！\n訂單編號：${currentOrderNumber}`);
-            
-            // 清空購物車並更新訂單編號
-            cart = [];
-            currentOrderNumber++;
+        if (response.ok) {
+            alert('訂單已送出！');
+            cart = [];  // 清空購物車
+            currentOrderNumber++;  // 更新訂單編號
+            // 清空表單
+            document.getElementById('customer-name').value = '';
+            document.getElementById('customer-phone').value = '';
             renderCart();
             cartModal.classList.add('hidden');
             document.body.classList.remove('modal-open');
         } else {
-            throw new Error(result.error || '送出訂單時發生錯誤');
+            throw new Error(result.error || '訂單發送失敗');
         }
     } catch (error) {
-        alert(`錯誤：${error.message}`);
+        console.error('送出訂單時發生錯誤：', error);
+        alert('送出訂單時發生錯誤，請稍後再試！');
     }
 });
 

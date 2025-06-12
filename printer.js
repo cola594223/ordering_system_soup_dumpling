@@ -45,7 +45,12 @@ class ReceiptPrinter {
                     minute: '2-digit',
                     hour12: false
                 })}`, 14),
-                '='.repeat(14),
+                '='.repeat(12),
+                '',
+                `訂購人：${orderData.customerName}`,
+                `電話：${orderData.customerPhone}`,
+                '',
+                '='.repeat(12),
                 '',
                 ...orderData.items.flatMap(item => {
                     // 先打印品項和價格
