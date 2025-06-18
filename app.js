@@ -323,6 +323,10 @@ submitOrderButton.addEventListener('click', async () => {
             successCustomerName.textContent = customerName;
             successCustomerPhone.textContent = customerPhone;
             successPickupTime.textContent = pickupTime;
+            closeSuccessModal.addEventListener('click', () => {
+                orderSuccessModal.classList.add('hidden');
+                document.body.classList.remove('modal-open');
+            });
 
             // 顯示 Modal
             orderSuccessModal.classList.remove('hidden');
