@@ -13,6 +13,14 @@ const categoriesContainer = document.getElementById('categories-container');
 const orderNumberElement = document.getElementById('order-number');
 const customerForm = document.getElementById('customer-form');
 
+// 取得 Modal 元素
+const orderSuccessModal = document.getElementById('order-success-modal');
+const closeSuccessModal = document.getElementById('close-success-modal');
+const successOrderNumber = document.getElementById('success-order-number');
+const successCustomerName = document.getElementById('success-customer-name');
+const successCustomerPhone = document.getElementById('success-customer-phone');
+const successPickupTime = document.getElementById('success-pickup-time');
+
 // 購物車數據
 let cart = [];
 let currentCategory = null;
@@ -205,11 +213,39 @@ function updateOrderNumber() {
     }
 }
 
+// 產生取餐時間選項
+function generatePickupTimes() {
+    const select = document.getElementById('pickup-time');
+    if (!select) return;
+
+    // 取得現在時間，加20分鐘
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 20);
+
+    // 設定最晚時間 20:00
+    const latest = new Date();
+    latest.setHours(20, 0, 0, 0);
+
+    // 每10分鐘一格
+    select.innerHTML = '';
+    while (now <= latest) {
+        const hour = now.getHours().toString().padStart(2, '0');
+        const min = now.getMinutes().toString().padStart(2, '0');
+        const label = `${hour}:${min}`;
+        const option = document.createElement('option');
+        option.value = label;
+        option.textContent = label;
+        select.appendChild(option);
+        now.setMinutes(now.getMinutes() + 10);
+    }
+}
+
 // 購物車開關
 viewCartButton.addEventListener('click', () => {
     cartModal.classList.remove('hidden');
     document.body.classList.add('modal-open');
     updateOrderNumber();  // 顯示購物車時更新訂單編號
+    generatePickupTimes(); // 開啟購物車時產生取餐時間
 });
 
 closeCartButton.addEventListener('click', () => {
@@ -227,6 +263,7 @@ submitOrderButton.addEventListener('click', async () => {
     // 獲取訂購人資訊
     const customerName = document.getElementById('customer-name').value.trim();
     const customerPhone = document.getElementById('customer-phone').value.trim();
+    const pickupTime = document.getElementById('pickup-time').value;
 
     // 驗證訂購人資訊
     if (!customerName) {
@@ -248,6 +285,13 @@ submitOrderButton.addEventListener('click', async () => {
         return;
     }
 
+    // 驗證取餐時間
+    if (!pickupTime) {
+        alert('請選擇取餐時間！');
+        document.getElementById('pickup-time').focus();
+        return;
+    }
+
     // 送出前 disable 按鈕
     submitOrderButton.disabled = true;
     submitOrderButton.textContent = '送出中...';
@@ -256,6 +300,7 @@ submitOrderButton.addEventListener('click', async () => {
         orderNumber: currentOrderNumber,
         customerName,
         customerPhone,
+        pickupTime, // 新增
         items: cart,
         total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
     };
@@ -273,7 +318,15 @@ submitOrderButton.addEventListener('click', async () => {
         const result = await response.json();
 
         if (response.ok) {
-            alert('訂單已送出！您的訂單編號是：' + result.orderNumber);
+            // 填入資訊
+            successOrderNumber.textContent = result.orderNumber;
+            successCustomerName.textContent = customerName;
+            successCustomerPhone.textContent = customerPhone;
+            successPickupTime.textContent = pickupTime;
+
+            // 顯示 Modal
+            orderSuccessModal.classList.remove('hidden');
+
             cart = [];  // 清空購物車
             currentOrderNumber = result.orderNumber + 1;  // 讓前端編號與後端同步
             // 清空表單
@@ -299,3 +352,4 @@ submitOrderButton.addEventListener('click', async () => {
 // 初始化頁面
 renderCategories();
 renderMenu();
+generatePickupTimes();
