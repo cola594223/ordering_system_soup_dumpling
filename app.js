@@ -273,7 +273,7 @@ submitOrderButton.addEventListener('click', async () => {
         const result = await response.json();
 
         if (response.ok) {
-            alert('訂單已送出！');
+            alert('訂單已送出！您的訂單編號是：' + currentOrderNumber);
             cart = [];  // 清空購物車
             currentOrderNumber++;  // 更新訂單編號
             // 清空表單
