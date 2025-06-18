@@ -248,6 +248,10 @@ submitOrderButton.addEventListener('click', async () => {
         return;
     }
 
+    // 送出前 disable 按鈕
+    submitOrderButton.disabled = true;
+    submitOrderButton.textContent = '送出中...';
+
     const orderData = {
         orderNumber: currentOrderNumber,
         customerName,
@@ -278,15 +282,21 @@ submitOrderButton.addEventListener('click', async () => {
             renderCart();
             cartModal.classList.add('hidden');
             document.body.classList.remove('modal-open');
+            // 送出成功後可選擇不啟用按鈕，或恢復按鈕
+            submitOrderButton.disabled = false;
+            submitOrderButton.textContent = '送出訂單';
         } else {
             throw new Error(result.error || '訂單發送失敗');
         }
     } catch (error) {
         console.error('送出訂單時發生錯誤：', error);
         alert('送出訂單時發生錯誤，請稍後再試！');
+        // 發生錯誤時恢復按鈕
+        submitOrderButton.disabled = false;
+        submitOrderButton.textContent = '送出訂單';
     }
 });
 
 // 初始化頁面
 renderCategories();
-renderMenu(); 
+renderMenu();
