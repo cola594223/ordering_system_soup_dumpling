@@ -273,16 +273,15 @@ submitOrderButton.addEventListener('click', async () => {
         const result = await response.json();
 
         if (response.ok) {
-            alert('訂單已送出！您的訂單編號是：' + currentOrderNumber);
+            alert('訂單已送出！您的訂單編號是：' + result.orderNumber);
             cart = [];  // 清空購物車
-            currentOrderNumber++;  // 更新訂單編號
+            currentOrderNumber = result.orderNumber + 1;  // 讓前端編號與後端同步
             // 清空表單
             document.getElementById('customer-name').value = '';
             document.getElementById('customer-phone').value = '';
             renderCart();
             cartModal.classList.add('hidden');
             document.body.classList.remove('modal-open');
-            // 送出成功後可選擇不啟用按鈕，或恢復按鈕
             submitOrderButton.disabled = false;
             submitOrderButton.textContent = '送出訂單';
         } else {
