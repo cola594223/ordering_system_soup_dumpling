@@ -26,6 +26,26 @@ let cart = [];
 let currentCategory = null;
 let currentOrderNumber = 50;  // 從50開始的訂單編號
 
+// 營業時間檢測函數
+function checkBusinessStatus() {
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0=週日, 1=週一, ..., 6=週六
+    const announcementOverlay = document.getElementById('announcement-overlay');
+    
+    if (dayOfWeek === 1) { // 週一
+        // 顯示公告
+        announcementOverlay.style.display = 'flex';
+        // 禁用所有訂購功能
+        document.body.style.pointerEvents = 'none';
+        announcementOverlay.style.pointerEvents = 'all';
+    } else {
+        // 隱藏公告
+        announcementOverlay.style.display = 'none';
+        // 確保頁面可以正常操作
+        document.body.style.pointerEvents = 'auto';
+    }
+}
+
 // 渲染分類標籤
 function renderCategories() {
     categoriesContainer.innerHTML = menuData.categories.map(category => `
@@ -357,3 +377,9 @@ submitOrderButton.addEventListener('click', async () => {
 renderCategories();
 renderMenu();
 generatePickupTimes();
+
+// 頁面載入時立即檢查營業狀態
+checkBusinessStatus();
+
+// 每分鐘檢查一次（處理跨日情況）
+setInterval(checkBusinessStatus, 60000);

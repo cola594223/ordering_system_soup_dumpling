@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>營業時間測試</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            min-height: 100px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        h2 {
+            color: #333;
+        }
+        .status-open {
+            color: green;
+            font-weight: bold;
+        }
+        .status-closed {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>線上點餐系統 - 營業時間測試</h1>
+    
+    <div class="test-section">
+        <h2>測試 1: 檢查當前日期狀態</h2>
+        <button onclick="testCurrentDay()">檢查當前日期</button>
+        <div id="current-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>測試 2: 模擬各個星期天數</h2>
+        <button onclick="testAllDays()">測試所有日期</button>
+        <div id="all-days-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>測試 3: 模擬週一公休</h2>
+        <button onclick="testMondayClosure()">模擬週一</button>
+        <div id="monday-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>測試 4: 模擬其他營業日</h2>
+        <button onclick="testOpenDays()">測試營業日</button>
+        <div id="open-days-result" class="result"></div>
+    </div>
+
+    <script>
+        // 營業時間配置
+        const businessHours = {
+            openDays: [0, 2, 3, 4, 5, 6], // 星期日=0, 星期二到六=2-6
+            openTime: "10:00",
+            closeTime: "20:00",
+            closedDayMessage: "固定每週一公休！"
+        };
+
+        // 檢查是否為營業日
+        function isBusinessDay(dayOfWeek) {
+            return businessHours.openDays.includes(dayOfWeek);
+        }
+
+        // 測試當前日期
+        function testCurrentDay() {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            const dayNames = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const isOpen = isBusinessDay(dayOfWeek);
+            
+            const result = `
+                <h3>當前日期測試結果</h3>
+                <p>今天是: ${dayNames[dayOfWeek]} (${now.toLocaleDateString('zh-TW')})</p>
+                <p>營業狀態: <span class="${isOpen ? 'status-open' : 'status-closed'}">${isOpen ? '營業中' : '公休中'}</span></p>
+                ${!isOpen ? '<p>提示訊息: ' + businessHours.closedDayMessage + '</p>' : ''}
+            `;
+            
+            document.getElementById('current-result').innerHTML = result;
+        }
+
+        // 測試所有日期
+        function testAllDays() {
+            const dayNames = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            let result = '<h3>所有日期測試結果</h3><table border="1" style="width:100%; border-collapse: collapse;"><tr><th>星期</th><th>營業狀態</th></tr>';
+            
+            for (let day = 0; day <= 6; day++) {
+                const isOpen = isBusinessDay(day);
+                result += `<tr>
+                    <td style="padding: 8px;">${dayNames[day]}</td>
+                    <td style="padding: 8px;" class="${isOpen ? 'status-open' : 'status-closed'}">${isOpen ? '營業' : '公休'}</td>
+                </tr>`;
+            }
+            
+            result += '</table>';
+            document.getElementById('all-days-result').innerHTML = result;
+        }
+
+        // 測試週一公休
+        function testMondayClosure() {
+            const mondayDay = 1;
+            const isOpen = isBusinessDay(mondayDay);
+            
+            const result = `
+                <h3>週一公休測試結果</h3>
+                <p>測試日期: 星期一</p>
+                <p>營業狀態: <span class="${isOpen ? 'status-open' : 'status-closed'}">${isOpen ? '營業中' : '公休中'}</span></p>
+                <p>預期結果: <span class="status-closed">公休中</span></p>
+                <p>測試結果: <span style="color: ${!isOpen ? 'green' : 'red'}; font-weight: bold;">${!isOpen ? '✓ 通過' : '✗ 失敗'}</span></p>
+                ${!isOpen ? '<p>顯示訊息: ' + businessHours.closedDayMessage + '</p>' : ''}
+            `;
+            
+            document.getElementById('monday-result').innerHTML = result;
+        }
+
+        // 測試營業日
+        function testOpenDays() {
+            const testDays = [
+                {day: 0, name: '星期日'},
+                {day: 2, name: '星期二'},
+                {day: 3, name: '星期三'},
+                {day: 4, name: '星期四'},
+                {day: 5, name: '星期五'},
+                {day: 6, name: '星期六'}
+            ];
+            
+            let allPassed = true;
+            let result = '<h3>營業日測試結果</h3><ul>';
+            
+            testDays.forEach(({day, name}) => {
+                const isOpen = isBusinessDay(day);
+                const passed = isOpen === true;
+                if (!passed) allPassed = false;
+                
+                result += `<li>${name}: <span style="color: ${passed ? 'green' : 'red'}; font-weight: bold;">
+                    ${passed ? '✓ 通過（營業）' : '✗ 失敗（應該營業但顯示公休）'}</span></li>`;
+            });
+            
+            result += '</ul>';
+            result += `<p><strong>總結果: <span style="color: ${allPassed ? 'green' : 'red'};">
+                ${allPassed ? '✓ 所有測試通過' : '✗ 有測試失敗'}</span></strong></p>`;
+            
+            document.getElementById('open-days-result').innerHTML = result;
+        }
+
+        // 頁面載入時自動執行當前日期測試
+        window.onload = function() {
+            testCurrentDay();
+        };
+    </script>
+</body>
+</html>

@@ -33,3 +33,7 @@ pids
 temp_receipt.txt 
 
 certbot
+
+/.claude
+
+/PRPs
