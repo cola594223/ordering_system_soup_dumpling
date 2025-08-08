@@ -26,6 +26,109 @@ let cart = [];
 let currentCategory = null;
 let currentOrderNumber = 50;  // 從50開始的訂單編號
 
+// 每日公告系統配置 - 獨立於週一公休系統
+const dailyAnnouncementConfig = {
+    targetDate: new Date(2025, 7, 8), // 2025年8月8日（月份從0開始）
+    cutoffTime: { hours: 13, minutes: 40 },
+    messages: {
+        beforeCutoff: "今日線上點餐時間至下午13:40，感謝您的支持。",
+        afterCutoff: "店家已打烊，天心坊湯包店將在明日營業時間為您服務～"
+    },
+    storageKey: "specialAnnouncement_2025_08_08",
+    manualEnableKey: "manualAnnouncementEnabled",
+    checkIntervalMs: 60000 // 每分鐘檢查
+};
+
+// 檢查是否為目標日期（2025年8月8日）
+function isTargetDate() {
+    const today = new Date();
+    const target = dailyAnnouncementConfig.targetDate;
+    return today.getFullYear() === target.getFullYear() &&
+           today.getMonth() === target.getMonth() &&
+           today.getDate() === target.getDate();
+}
+
+// 檢查是否手動啟用
+function isManuallyEnabled() {
+    return localStorage.getItem(dailyAnnouncementConfig.manualEnableKey) === 'true';
+}
+
+// 檢查是否應該顯示公告（目標日期或手動啟用）
+function shouldShowDailyAnnouncement() {
+    return isTargetDate() || isManuallyEnabled();
+}
+
+// 檢查是否已過截止時間
+function isPastCutoffTime() {
+    const now = new Date();
+    const cutoff = new Date();
+    cutoff.setHours(dailyAnnouncementConfig.cutoffTime.hours, dailyAnnouncementConfig.cutoffTime.minutes, 0, 0);
+    return now >= cutoff;
+}
+
+// 檢查公告是否已被關閉
+function isDailyAnnouncementClosed() {
+    return localStorage.getItem(dailyAnnouncementConfig.storageKey) === 'closed';
+}
+
+// 手動啟用公告（供開發或管理使用）
+function enableManualAnnouncement() {
+    localStorage.setItem(dailyAnnouncementConfig.manualEnableKey, 'true');
+    checkDailyAnnouncement();
+}
+
+// 手動停用公告
+function disableManualAnnouncement() {
+    localStorage.removeItem(dailyAnnouncementConfig.manualEnableKey);
+    const overlay = document.getElementById('daily-announcement-overlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+// 關閉每日公告
+function closeDailyAnnouncement() {
+    const overlay = document.getElementById('daily-announcement-overlay');
+    overlay.style.display = 'none';
+    
+    // 僅在目標日期保存關閉狀態
+    if (isTargetDate()) {
+        localStorage.setItem(dailyAnnouncementConfig.storageKey, 'closed');
+    }
+}
+
+// 顯示每日公告
+function showDailyAnnouncement(message, isCloseable) {
+    const overlay = document.getElementById('daily-announcement-overlay');
+    const content = document.getElementById('daily-announcement-content');
+    const closeButton = document.getElementById('daily-announcement-close');
+    
+    if (!overlay || !content || !closeButton) return;
+    
+    content.textContent = message;
+    closeButton.style.display = isCloseable ? 'block' : 'none';
+    overlay.style.display = 'flex';
+}
+
+// 主要檢查邏輯
+function checkDailyAnnouncement() {
+    // 如果不是目標日期且未手動啟用，不顯示
+    if (!shouldShowDailyAnnouncement()) {
+        return;
+    }
+    
+    // 如果公告已關閉，不顯示
+    if (isDailyAnnouncementClosed()) {
+        return;
+    }
+    
+    const isPastCutoff = isPastCutoffTime();
+    const message = isPastCutoff 
+        ? dailyAnnouncementConfig.messages.afterCutoff 
+        : dailyAnnouncementConfig.messages.beforeCutoff;
+    const isCloseable = !isPastCutoff;
+    
+    showDailyAnnouncement(message, isCloseable);
+}
+
 // 營業時間檢測函數
 function checkBusinessStatus() {
     const today = new Date();
@@ -383,3 +486,22 @@ checkBusinessStatus();
 
 // 每分鐘檢查一次（處理跨日情況）
 setInterval(checkBusinessStatus, 60000);
+
+// 每日公告系統初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 綁定每日公告關閉事件
+    const dailyCloseButton = document.getElementById('daily-announcement-close');
+    if (dailyCloseButton) {
+        dailyCloseButton.addEventListener('click', closeDailyAnnouncement);
+    }
+    
+    // 頁面載入時立即檢查每日公告
+    checkDailyAnnouncement();
+});
+
+// 每分鐘檢查每日公告（處理跨時間點切換）
+setInterval(checkDailyAnnouncement, dailyAnnouncementConfig.checkIntervalMs);
+
+// 開發者工具：手動控制函數（可在瀏覽器 console 使用）
+// enableManualAnnouncement() - 手動啟用公告
+// disableManualAnnouncement() - 手動停用公告
